@@ -34,20 +34,15 @@
 #include "OLEDDisplay.h"
 #include <SPI.h>
 
-#if F_CPU == 160000000L
-  #define BRZO_I2C_SPEED 1000
-#else
-  #define BRZO_I2C_SPEED 800
-#endif
-
 class SSD1306Spi : public OLEDDisplay {
   private:
       uint8_t             _rst;
       uint8_t             _dc;
       uint8_t             _cs;
+      SPIClass&           _spi;
 
   public:
-    SSD1306Spi(uint8_t _rst, uint8_t _dc, uint8_t _cs, OLEDDISPLAY_GEOMETRY g = GEOMETRY_128_64) {
+    SSD1306Spi(uint8_t _rst, uint8_t _dc, uint8_t _cs, SPIClass& _spi = SPI, OLEDDISPLAY_GEOMETRY g = GEOMETRY_128_64) : _spi(_spi) {
         setGeometry(g);
 
       this->_rst = _rst;
@@ -60,8 +55,8 @@ class SSD1306Spi : public OLEDDisplay {
       pinMode(_cs, OUTPUT);
       pinMode(_rst, OUTPUT);
 
-      SPI.begin ();
-      SPI.setClockDivider (SPI_CLOCK_DIV2);
+      _spi.begin ();
+      _spi.setClockDivider (SPI_CLOCK_DIV2);
 
       // Pulse Reset low for 10ms
       digitalWrite(_rst, HIGH);
@@ -116,7 +111,7 @@ class SSD1306Spi : public OLEDDisplay {
        digitalWrite(_cs, LOW);
        for (y = minBoundY; y <= maxBoundY; y++) {
          for (x = minBoundX; x <= maxBoundX; x++) {
-           SPI.transfer(buffer[x + y * displayWidth]);
+           _spi.transfer(buffer[x + y * displayWidth]);
          }
          yield();
        }
@@ -140,7 +135,7 @@ class SSD1306Spi : public OLEDDisplay {
         digitalWrite(_dc, HIGH);   // data mode
         digitalWrite(_cs, LOW);
         for (uint16_t i=0; i<displayBufferSize; i++) {
-          SPI.transfer(buffer[i]);
+          _spi.transfer(buffer[i]);
           yield();
         }
         digitalWrite(_cs, HIGH);
@@ -152,7 +147,7 @@ class SSD1306Spi : public OLEDDisplay {
       digitalWrite(_cs, HIGH);
       digitalWrite(_dc, LOW);
       digitalWrite(_cs, LOW);
-      SPI.transfer(com);
+      _spi.transfer(com);
       digitalWrite(_cs, HIGH);
     }
 };
