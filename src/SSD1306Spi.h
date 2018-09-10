@@ -109,12 +109,18 @@ class SSD1306Spi : public OLEDDisplay {
        digitalWrite(_cs, HIGH);
        digitalWrite(_dc, HIGH);   // data mode
        digitalWrite(_cs, LOW);
+
+       // Copy bounding box of changes to display buffer, then
+       // write all bytes in one call.
+       uint16_t pos = 0;
        for (y = minBoundY; y <= maxBoundY; y++) {
          for (x = minBoundX; x <= maxBoundX; x++) {
-           _spi.transfer(buffer[x + y * displayWidth]);
+           this->buffer_display[pos++] = buffer_back[x + y * this->displayWidth];
          }
-         yield();
        }
+
+       _spi.writeBytes(this->buffer_display, pos);
+
        digitalWrite(_cs, HIGH);
      #else
        // No double buffering
@@ -134,10 +140,9 @@ class SSD1306Spi : public OLEDDisplay {
         digitalWrite(_cs, HIGH);
         digitalWrite(_dc, HIGH);   // data mode
         digitalWrite(_cs, LOW);
-        for (uint16_t i=0; i<displayBufferSize; i++) {
-          _spi.transfer(buffer[i]);
-          yield();
-        }
+
+        _spi.writeBytes(buffer, displayBufferSize);
+
         digitalWrite(_cs, HIGH);
      #endif
     }
@@ -147,7 +152,7 @@ class SSD1306Spi : public OLEDDisplay {
       digitalWrite(_cs, HIGH);
       digitalWrite(_dc, LOW);
       digitalWrite(_cs, LOW);
-      _spi.transfer(com);
+      _spi.write(com);
       digitalWrite(_cs, HIGH);
     }
 };

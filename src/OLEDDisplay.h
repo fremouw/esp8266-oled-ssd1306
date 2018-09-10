@@ -222,7 +222,7 @@ class OLEDDisplay : public Print {
     // normal brightness & contrast:  contrast = 100
     void setContrast(uint8_t contrast, uint8_t precharge = 241, uint8_t comdetect = 64);
 
-    // Convenience method to access 
+    // Convenience method to access
     void setBrightness(uint8_t);
 
     // Reset display rotation or mirroring
@@ -262,6 +262,7 @@ class OLEDDisplay : public Print {
 
     #ifdef OLEDDISPLAY_DOUBLE_BUFFER
     uint8_t            *buffer_back = NULL;
+    uint8_t            *buffer_display = NULL;
     #endif
 
   protected:

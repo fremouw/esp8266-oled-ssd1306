@@ -59,6 +59,16 @@ bool OLEDDisplay::init() {
     return false;
   }
   }
+  if(this->buffer_display==NULL) {
+  this->buffer_display = (uint8_t*) malloc(sizeof(uint8_t) * displayBufferSize);
+
+  if(!this->buffer_display) {
+    DEBUG_OLEDDISPLAY("[OLEDDISPLAY][init] Not enough memory to create display buffer\n");
+    free(this->buffer);
+    free(this->buffer_back);
+    return false;
+  }
+  }
   #endif
 
   sendInitCommands();
@@ -71,6 +81,7 @@ void OLEDDisplay::end() {
   if (this->buffer) { free(this->buffer); this->buffer = NULL; }
   #ifdef OLEDDISPLAY_DOUBLE_BUFFER
   if (this->buffer_back) { free(this->buffer_back); this->buffer_back = NULL; }
+  if (this->buffer_display) { free(this->buffer_display); this->buffer_display = NULL; }
   #endif
   if (this->logBuffer != NULL) { free(this->logBuffer); this->logBuffer = NULL; }
 }
